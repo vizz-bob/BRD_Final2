@@ -1,0 +1,597 @@
+# ============================================================
+# BRD Platform – Full Stack Docker Compose
+# EC2 IP : 13.232.219.91  |  Base URL : http://localhost
+# ============================================================
+# PORT MAP
+# ── Infrastructure ──────────────────────────────────────────
+#   PostgreSQL   : 5432
+#   Redis        : 6379
+#   pgAdmin      : 5050
+# ── Backends (Django / Gunicorn) ────────────────────────────
+#   Merged Tenant+Master : 8000
+#   Master Admin         : 8001
+#   Tenant Admin         : 8002
+#   Channel Partner      : 8003
+#   Sales CRM            : 8004
+#   Fraud Team           : 8005
+#   Operation Verify     : 8006
+#   Valuation            : 8007
+#   Borrower App         : 8008
+#   Agents App           : 8009
+#   CRM                  : 8010
+#   Finance Dashboard    : 8011
+#   Legal Dashboard      : 8012
+#   Website Main         : 8013
+# ── Frontends (React / Nginx) ───────────────────────────────
+#   Merged Tenant+Master : 3000
+#   Tenant Admin         : 3001
+#   Master Admin         : 3002
+#   Operation Verify     : 3003
+#   Sales CRM            : 3004
+#   Finance Dashboard    : 3005
+#   Channel Partner      : 3006
+#   Legal Dashboard      : 3007
+#   Fraud Team           : 3008
+#   Valuation            : 3009
+#   CRM                  : 3010
+#   Website Main         : 3011
+# ============================================================
+
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────
+# SHARED ENVIRONMENT (backend common vars)
+# ─────────────────────────────────────────────────────────────
+x-django-env: &django-env
+  DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-super-secret-key-change-in-production}
+  SSO_SECRET_KEY: ${SSO_SECRET_KEY:-FfhkVs-_QlvVcbNSALY9HQxU72pkxWqnYlLy_mwIbAk}
+  DEBUG: ${DEBUG:-False}
+  ALLOWED_HOSTS: "*"
+  DB_HOST: postgres
+  DB_PORT: 5432
+  DB_USER: ${DB_USER:-brd_user}
+  DB_PASSWORD: ${DB_PASSWORD:-Brd@Secure2024!}
+  REDIS_URL: redis://redis:6379/0
+  CORS_ALLOWED_ORIGINS: >-
+    http://localhost:3000,http://localhost:3001,http://localhost:3002,
+    http://localhost:3003,http://localhost:3004,http://localhost:3005,
+    http://localhost:3006,http://localhost:3007,http://localhost:3008,
+    http://localhost:3009,http://localhost:3010,http://localhost:3011,
+    http://13.232.219.91:3000,http://13.232.219.91:3001,http://13.232.219.91:3002
+
+# ─────────────────────────────────────────────────────────────
+# NETWORKS
+# ─────────────────────────────────────────────────────────────
+networks:
+  brd_network:
+    driver: bridge
+
+# ─────────────────────────────────────────────────────────────
+# VOLUMES (persistent data)
+# ─────────────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+  redis_data:
+  pgadmin_data:
+  merged_static:
+  master_static:
+  tenant_static:
+
+# ═════════════════════════════════════════════════════════════
+# SERVICES
+# ═════════════════════════════════════════════════════════════
+services:
+
+  # ──────────────────────────────────────────
+  # INFRASTRUCTURE
+  # ──────────────────────────────────────────
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: brd_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_SUPERUSER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERPASSWORD:-postgres_root_pass}
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - brd_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: brd_redis
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - brd_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: brd_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@brd.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - brd_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ──────────────────────────────────────────
+  # BACKEND SERVICES
+  # ──────────────────────────────────────────
+
+  # 1. Merged Tenant + Master Backend  →  :8000
+  merged-backend:
+    build:
+      context: ./BRD-MergedTenantMaster-Backend
+      dockerfile: Dockerfile
+    container_name: brd_merged_backend
+    restart: unless-stopped
+    environment:
+      <<: *django-env
+      DB_NAME: brd_merged_db
+      DJANGO_SETTINGS_MODULE: brd_platform.settings
+    ports:
+      - "8000:8000"
+    volumes:
+      - merged_static:/app/staticfiles
+    networks:
+      - brd_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # 2. Master Admin Backend  →  :8001
+  master-backend:
+    build:
+      context: ./BRD_MasterAdmin_Backend_1.1
+      dockerfile: Dockerfile
+    container_name: brd_master_backend
+    restart: unless-stopped
+    environment:
+      <<: *django-env
+      DB_NAME: brd_master_db
+      DJANGO_SETTINGS_MODULE: brd_platform.settings
+    ports:
+      - "8001:8000"
+    volumes:
+      - master_static:/app/staticfiles
+    networks:
+      - brd_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # 3. Tenant Admin Backend  →  :8002
+  tenant-backend:
+    build:
+      context: ./BRD-TenantAdmin_backend_2.0
+      dockerfile: Dockerfile
+    container_name: brd_tenant_backend
+    restart: unless-stopped
+    environment:
+      <<: *django-env
+      DB_NAME: brd_tenant_db
+      DJANGO_SETTINGS_MODULE: brd_platform.settings
+    ports:
+      - "8002:8000"
+    volumes:
+      - tenant_static:/app/staticfiles
+    networks:
+      - brd_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # 4. Channel Partner Dashboard Backend  →  :8003
+  channel-partner-backend:
+    build:
+      context: ./BRD-ChannelPartnerDashboard-Backend
+      dockerfile: Dockerfile
+    container_name: brd_channel_partner_backend
+    restart: unless-stopped
+    environment:
+      <<: *django-env
+      DB_NAME: brd_channel_partner_db
+      DJANGO_SETTINGS_MODULE: ChannelPartner.settings
+    ports:
+      - "8003:8000"
+    networks:
+      - brd_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 5. Sales CRM Dashboard Backend  →  :8004
+  sales-crm-backend:
+    build:
+      context: ./BRD-SalesCRM-Dashboard-Backend
+      dockerfile: Dockerfile
+    container_name: brd_sales_crm_backend
+    restart: unless-stopped
+    environment:
+      <<: *django-env
+      DB_NAME: brd_sales_crm_db
+      DJANGO_SETTINGS_MODULE: sales_crm_dashboard.settings
+    ports:
+      - "8004:8000"
+    networks:
+      - brd_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 6. Fraud Team Dashboard Backend  →  :8005
+  fraud-backend:
+    build:
+      context: ./BRD-FraudTeam-Dashboard-Backend
+      dockerfile: Dockerfile
+    container_name: brd_fraud_backend
+    restart: unless-stopped
+    environment:
+      <<: *django-env
+      DB_NAME: brd_fraud_db
+      DJANGO_SETTINGS_MODULE: fraud_backend.settings
+    ports:
+      - "8005:8000"
+    networks:
+      - brd_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 7. Operation Verification Backend  →  :8006
+  operation-backend:
+    build:
+      context: ./BRD-OperationVerification-Backend
+      dockerfile: Dockerfile
+    container_name: brd_operation_backend
+    restart: unless-stopped
+    environment:
+      <<: *django-env
+      DB_NAME: brd_operation_db
+      DJANGO_SETTINGS_MODULE: BRD_OPERATION.settings
+    ports:
+      - "8006:8000"
+    networks:
+      - brd_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 8. Valuation Dashboard Backend  →  :8007
+  valuation-backend:
+    build:
+      context: ./BRD-Valuation-Dashboard-Backend
+      dockerfile: Dockerfile
+    container_name: brd_valuation_backend
+    restart: unless-stopped
+    environment:
+      <<: *django-env
+      DB_NAME: brd_valuation_db
+      DJANGO_SETTINGS_MODULE: valuation.settings
+    ports:
+      - "8007:8000"
+    networks:
+      - brd_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 9. Borrower App Backend  →  :8008
+  borrower-backend:
+    build:
+      context: ./BRD-BorrowerApp-Backend
+      dockerfile: Dockerfile
+    container_name: brd_borrower_backend
+    restart: unless-stopped
+    environment:
+      <<: *django-env
+      DB_NAME: brd_borrower_db
+      DJANGO_SETTINGS_MODULE: borrower.settings
+    ports:
+      - "8008:8000"
+    networks:
+      - brd_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 10. Agents App Backend  →  :8009
+  agents-backend:
+    build:
+      context: ./BRD-AgentsApp-Backend
+      dockerfile: Dockerfile
+    container_name: brd_agents_backend
+    restart: unless-stopped
+    environment:
+      <<: *django-env
+      DB_NAME: brd_agents_db
+      DJANGO_SETTINGS_MODULE: mobile_app.settings
+    ports:
+      - "8009:8000"
+    networks:
+      - brd_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 11. CRM Backend  →  :8010
+  crm-backend:
+    build:
+      context: ./BRD_CRM_1.1_BACKEND
+      dockerfile: Dockerfile
+    container_name: brd_crm_backend
+    restart: unless-stopped
+    environment:
+      <<: *django-env
+      DB_NAME: brd_crm_db
+      DJANGO_SETTINGS_MODULE: brd_crm.settings
+    ports:
+      - "8010:8000"
+    networks:
+      - brd_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 12. Finance Dashboard Backend  →  :8011
+  finance-backend:
+    build:
+      context: ./BRD_FINANCE_DASHBOARD_Backend
+      dockerfile: Dockerfile
+    container_name: brd_finance_backend
+    restart: unless-stopped
+    environment:
+      <<: *django-env
+      DB_NAME: brd_finance_db
+      DJANGO_SETTINGS_MODULE: backend.settings
+    ports:
+      - "8011:8000"
+    networks:
+      - brd_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 13. Legal Dashboard Backend  →  :8012
+  legal-backend:
+    build:
+      context: ./BRD-LegalDashboard-Backend
+      dockerfile: Dockerfile
+    container_name: brd_legal_backend
+    restart: unless-stopped
+    environment:
+      <<: *django-env
+      DB_NAME: brd_legal_db
+      DJANGO_SETTINGS_MODULE: Legal_Dashboard.settings
+    ports:
+      - "8012:8000"
+    networks:
+      - brd_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 14. Website Main Backend  →  :8013
+  website-backend:
+    build:
+      context: ./BRD-website-main-backend
+      dockerfile: Dockerfile
+    container_name: brd_website_backend
+    restart: unless-stopped
+    environment:
+      <<: *django-env
+      DB_NAME: brd_website_db
+      DJANGO_SETTINGS_MODULE: config.settings
+    ports:
+      - "8013:8000"
+    networks:
+      - brd_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ──────────────────────────────────────────
+  # FRONTEND SERVICES (React → Nginx)
+  # ──────────────────────────────────────────
+
+  # 1. Merged Tenant+Master Frontend  →  :3000
+  merged-frontend:
+    build:
+      context: ./BRD-MergedTenantMaster-Frontend
+      dockerfile: Dockerfile
+    container_name: brd_merged_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    networks:
+      - brd_network
+    depends_on:
+      - merged-backend
+
+  # 2. Tenant Admin Frontend  →  :3001
+  tenant-frontend:
+    build:
+      context: ./BRD_TenantAdmin_Frontend_1.1
+      dockerfile: Dockerfile
+    container_name: brd_tenant_frontend
+    restart: unless-stopped
+    ports:
+      - "3001:80"
+    networks:
+      - brd_network
+    depends_on:
+      - tenant-backend
+
+  # 3. Master Admin Frontend  →  :3002
+  master-frontend:
+    build:
+      context: ./BRD_MasterAdmin_Frontend_1.1
+      dockerfile: Dockerfile
+    container_name: brd_master_frontend
+    restart: unless-stopped
+    ports:
+      - "3002:80"
+    networks:
+      - brd_network
+    depends_on:
+      - master-backend
+
+  # 4. Operation Verification Dashboard  →  :3003
+  operation-frontend:
+    build:
+      context: ./BRD-Operation-Verification-Dashboard
+      dockerfile: Dockerfile
+    container_name: brd_operation_frontend
+    restart: unless-stopped
+    ports:
+      - "3003:80"
+    networks:
+      - brd_network
+    depends_on:
+      - operation-backend
+
+  # 5. Sales CRM Frontend  →  :3004
+  sales-crm-frontend:
+    build:
+      context: ./BRD_SALES_CRM
+      dockerfile: Dockerfile
+    container_name: brd_sales_crm_frontend
+    restart: unless-stopped
+    ports:
+      - "3004:80"
+    networks:
+      - brd_network
+    depends_on:
+      - sales-crm-backend
+
+  # 6. Finance Dashboard Frontend  →  :3005
+  finance-frontend:
+    build:
+      context: ./BRD_FINANCE_DASHBOARD
+      dockerfile: Dockerfile
+    container_name: brd_finance_frontend
+    restart: unless-stopped
+    ports:
+      - "3005:80"
+    networks:
+      - brd_network
+    depends_on:
+      - finance-backend
+
+  # 7. Channel Partner Dashboard Frontend  →  :3006
+  channel-partner-frontend:
+    build:
+      context: ./BRD-ChannelPartner-Dashboard
+      dockerfile: Dockerfile
+    container_name: brd_channel_partner_frontend
+    restart: unless-stopped
+    ports:
+      - "3006:80"
+    networks:
+      - brd_network
+    depends_on:
+      - channel-partner-backend
+
+  # 8. Legal Dashboard Frontend  →  :3007
+  legal-frontend:
+    build:
+      context: ./BRD-LEGAL-dashboard
+      dockerfile: Dockerfile
+    container_name: brd_legal_frontend
+    restart: unless-stopped
+    ports:
+      - "3007:80"
+    networks:
+      - brd_network
+    depends_on:
+      - legal-backend
+
+  # 9. Fraud Team Dashboard Frontend  →  :3008
+  fraud-frontend:
+    build:
+      context: ./BRD-FraudTeamDashboard
+      dockerfile: Dockerfile
+    container_name: brd_fraud_frontend
+    restart: unless-stopped
+    ports:
+      - "3008:80"
+    networks:
+      - brd_network
+    depends_on:
+      - fraud-backend
+
+  # 10. Valuation Dashboard Frontend  →  :3009
+  valuation-frontend:
+    build:
+      context: ./BRD-ValuationDashboard
+      dockerfile: Dockerfile
+    container_name: brd_valuation_frontend
+    restart: unless-stopped
+    ports:
+      - "3009:80"
+    networks:
+      - brd_network
+    depends_on:
+      - valuation-backend
+
+  # 11. CRM Frontend  →  :3010
+  crm-frontend:
+    build:
+      context: ./BRD_CRM-1.1
+      dockerfile: Dockerfile
+    container_name: brd_crm_frontend
+    restart: unless-stopped
+    ports:
+      - "3010:80"
+    networks:
+      - brd_network
+    depends_on:
+      - crm-backend
+
+  # 12. Website Main Frontend  →  :3011
+  website-frontend:
+    build:
+      context: ./BRD-website-main
+      dockerfile: Dockerfile
+    container_name: brd_website_frontend
+    restart: unless-stopped
+    ports:
+      - "3011:80"
+    networks:
+      - brd_network
+    depends_on:
+      - website-backend
