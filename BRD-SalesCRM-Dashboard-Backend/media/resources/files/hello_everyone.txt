@@ -1,0 +1,9 @@
+Hello Everyone!
+
+This is a sample resource file content.
+You can replace this with an actual PDF, DOCX, or any other file type.
+
+Resource Details:
+- Title: Hello Everyone
+- Category: Adhi
+- Type: PDF

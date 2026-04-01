@@ -1,0 +1,134 @@
+[33m4cfdab2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mharika[m[33m, [m[1;31morigin/harika[m[33m)[m initial commit
+[33mac9f536[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m updated Api
+[33m5a9c842[m[33m ([m[1;31morigin/Alekhya[m[33m)[m updated thrid parti apis
+[33mf8e9f09[m the connection of main website to tenantmaster
+[33m3bedc98[m Merge branch 'main' of https://github.com/Mankuuu1405/BRD-MergedTenantMaster-Backend
+[33m1790ceb[m[33m ([m[1;31morigin/sakshi[m[33m)[m updated
+[33mfbb41f5[m update
+[33md954533[m Merge branch 'sakshi'
+[33mb0c093b[m Merge branch 'master'
+[33m7e84c6f[m[33m ([m[1;31morigin/master[m[33m)[m update los
+[33m6c55b5a[m updated los
+[33m28a1dc3[m updated integration
+[33m9d6387e[m updated
+[33mae14948[m updated integration backend
+[33mf6bd157[m updated integration backend
+[33m411a2ed[m rule management integration
+[33m5c82d62[m updated by sakshi
+[33m6ffceb3[m updated with integration
+[33m1e8ea5b[m conflict resoved
+[33m4621d3a[m updated of roles and permissions
+[33mc768a0f[m Merge branch 'main' of https://github.com/Mankuuu1405/BRD-MergedTenantMaster-Backend into srinidhi
+[33m4d07ec2[m integration of third party users
+[33mfc29bf5[m updated integation
+[33m0fc4a70[m update 5 modules
+[33m1df46af[m updated be
+[33m4410a2a[m updated be
+[33mbdfd2f6[m integration is completd
+[33mf2e9c64[m manage role integration is completed
+[33m8681fa3[m update code
+[33mbb6775f[m updated code
+[33m019a91f[m Merge branch 'saloni'
+[33m4d2678b[m[33m ([m[1;31morigin/saloni[m[33m)[m integration of disbursement and mandate management
+[33me3728d0[m updated
+[33m2acbbb5[m[33m ([m[1;31morigin/kundan[m[33m)[m merge issue
+[33m8ae5193[m updated backend
+[33m95864af[m Fix merge conflict in settings.py
+[33mdad782c[m updated code backend
+[33m65d7409[m Merge branch 'main' of https://github.com/Mankuuu1405/BRD-MergedTenantMaster-Backend
+[33mebb7f9e[m change in active loans
+[33md78d08d[m Merge remote-tracking branch 'origin/main'
+[33m5759faf[m updated code of operations
+[33m655b9b7[m Resolved merge conflicts
+[33m75b544c[m created active loans
+[33m952f38a[m login fix
+[33m3d412e7[m created merge file of tenat and master
+[33m772123c[m connection
+[33m7169a52[m deployed 21 jan
+[33mcc56146[m Merge pull request #33 from Mankuuu1405/rutik
+[33mf3b889e[m rutik changes
+[33mf8319af[m deployed 9-01-2026
+[33m58baeda[m Merge pull request #32 from Mankuuu1405/rutik
+[33m223fdd9[m rutik updated
+[33m0d252f6[m Merge pull request #31 from Mankuuu1405/prudhvi
+[33mc4775a0[m Template managment
+[33m7187898[m Merge pull request #30 from Mankuuu1405/rutik
+[33m546e589[m Merge branch 'main' of https://github.com/Mankuuu1405/BRD_MasterAdmin_Backend_1.1 into rutik
+[33m7172d28[m updated backend with rbac
+[33ma443271[m Merge pull request #29 from Mankuuu1405/prudhvi
+[33mde40ff8[m Bank funds updates
+[33m149142d[m Merge pull request #28 from Mankuuu1405/prudhvi
+[33m6237886[m Merge pull request #27 from Mankuuu1405/rutik
+[33m2ae8511[m update
+[33mc5dfd0e[m Updated Backend
+[33m48ab734[m Merge pull request #26 from Mankuuu1405/prudhvi
+[33m25ac1d0[m Updated API's
+[33m3df3210[m Eligiblity score managment API
+[33m8487f34[m Merge pull request #25 from Mankuuu1405/prudhvi
+[33m837894c[m Merge branch 'main' into prudhvi
+[33mdaad0c8[m product revenue api
+[33m592d782[m Updated Product & Revenue Managment
+[33m70054e5[m Merge pull request #24 from Mankuuu1405/rutik
+[33m474e790[m Customized Role Based Access Updated
+[33me4d2dec[m Update requirements and add dockerfile
+[33mc63c14e[m updated
+[33m87a90c5[m updated
+[33mff43b11[m Merge pull request #23 from Mankuuu1405/prudhvi
+[33m69c40df[m approval master
+[33m93b9700[m Merge pull request #22 from Mankuuu1405/prudhvi
+[33m81e4f0f[m updated user roles
+[33m486ee95[m Merge pull request #21 from Mankuuu1405/prudhvi
+[33m8eb5077[m Updated users
+[33mae4500a[m updated backend users
+[33mc05483f[m updated code
+[33m1c1b429[m Merge pull request #20 from Mankuuu1405/prudhvi
+[33m4f9ace4[m Updated user management
+[33m44a9a96[m Merge pull request #19 from Mankuuu1405/rutik
+[33m7d74f17[m added django-axes in requirements.txt
+[33me494bb6[m Merge pull request #18 from Mankuuu1405/rutik
+[33m5a5a3f5[m Merge pull request #17 from Mankuuu1405/prudhvi
+[33m78e6930[m backend updated
+[33m780930a[m Dropdown
+[33m50ce94a[m Merge pull request #16 from Mankuuu1405/demon
+[33m37bc93f[m some changes
+[33me2a5eff[m Merge pull request #15 from Mankuuu1405/rutik
+[33m8236f18[m dashboard home code updated
+[33mca7f952[m Merge pull request #14 from Mankuuu1405/demon
+[33mf91d679[m Merge branch 'main' into demon
+[33m862d4ed[m Remove db.sqlite3 from repo and add to .gitignore
+[33m54e0c4e[m Merge pull request #13 from Mankuuu1405/rutik
+[33mc624aca[m removed db from gitignore
+[33m798e929[m Remove db.sqlite3 from repo and add to .gitignore
+[33m3c82355[m API INTEGRATED - CurrencyManagement and ConcessionManagement
+[33m613545d[m db problem
+[33m724f800[m Delete db.sqlite3
+[33m94506be[m rule-mangement api integration
+[33m470052d[m Merge pull request #10 from Mankuuu1405/prudhvi
+[33mca598ac[m Merge branch 'main' into prudhvi
+[33m8749e63[m Home,occpation,employment
+[33m9812f33[m Merge pull request #9 from Mankuuu1405/prudhvi
+[33m2e7dc81[m Updated backend modules and fixes
+[33mf672e00[m Merge pull request #8 from Mankuuu1405/rutik
+[33md3000e8[m Subscription page API Integrated - remaining Subscribers
+[33m43598dd[m Merge pull request #7 from Mankuuu1405/prudhvi
+[33m2e378d3[m sunday and Monday work
+[33mb09ce12[m Merge pull request #6 from Mankuuu1405/prudhvi
+[33m557466d[m collection.currency,disbursement,document,concession,provisioning
+[33m5f8c7a7[m Merge pull request #5 from Mankuuu1405/rutik
+[33m77dc0c0[m Merge branch 'main' into rutik
+[33m11ebaef[m Delete db.sqlite3
+[33m0cb70f1[m Add db.sqlite3 to .gitignore
+[33m51bc805[m Resolve merge conflicts and remove db.sqlite3 from tracking
+[33m2d166d0[m gitignore file updated - removed databasae form gitignore file
+[33m9ae2662[m Approval Master url changes and migrations
+[33mb1fc09f[m db added
+[33m57bd140[m Update .gitignore to include .env file
+[33m0f3175f[m Merge pull request #4 from Mankuuu1405/rutik
+[33m0982316[m updated gitignore
+[33m1d92d21[m Merge pull request #2 from Mankuuu1405/Raj
+[33m1f41225[m Delete db.sqlite3
+[33me189657[m Delete db.sqlite3
+[33m3ef9d5c[m Merge pull request #3 from Mankuuu1405/rutik
+[33m1e29dba[m login route added in brd_platform
+[33m51b0641[m 5 added
+[33m33099f1[m Initial Commit
